@@ -13,9 +13,9 @@
     "learnBtn": "Learn More"
   },
   "features": {
-    "encryption": {
-      "title": "End-to-End Encryption",
-      "desc": "Your reports are encrypted and secure from the moment you submit them."
+      "help": {
+      "title": "Attach Evidence",
+      "desc": "Upload documents, screenshots, or audio to support your report."
     },
     "anonymity": {
       "title": "Complete Anonymity",
@@ -69,5 +69,5 @@
     "supportText": "Our support team is here to help you understand the process and your rights.",
     "contactBtn": "Contact Support"
   },
-  "footer": "Protected by enterprise-grade encryption. Your safety is our priority."
+  "footer": "© 2025 Alkhorayef Industries. All rights reserved. Developed & maintained by AMIC IT."
 }

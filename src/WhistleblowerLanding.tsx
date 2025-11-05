@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { Shield, Lock, FileText, MessageSquare, ChevronDown, Menu, X, Globe, Upload, File, XCircle } from 'lucide-react';
+import { Shield, Lock, FileText, MessageSquare, ChevronDown, Menu, X, Globe, Upload, File, XCircle, ZoomIn, Moon, Sun } from 'lucide-react';
 import en from './locale/en.json';
 import ar from './locale/ar.json';
 // Import utility functions
 import { stripMetadata, formatFileSize, validateFileSize, validateFileType } from './utils/metadataUtils';
 import { fileToBase64 } from './utils/base64';
 import './App.css';
-import emailjs from 'emailjs-com';
 import logo from './assets/logo.svg';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+// Backend API URL - update this with your actual backend endpoint
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 
 type Language = 'en' | 'ar';
+type Theme = 'dark' | 'light';
 
 interface Translations {
   nav: {
@@ -28,6 +32,10 @@ interface Translations {
   };
   features: {
     anonymity: {
+      title: string;
+      desc: string;
+    };
+    help: {
       title: string;
       desc: string;
     };
@@ -144,6 +152,7 @@ export const departments: Record<Language, Department[]> = {
 
 export default function WhistleblowerLanding(): React.JSX.Element {
   const [language, setLanguage] = useState<Language>('en');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [activeSection, setActiveSection] = useState<string>('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -161,8 +170,22 @@ export default function WhistleblowerLanding(): React.JSX.Element {
   const t = translations[language];
   const isRTL = language === 'ar';
 
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
   const toggleLanguage = (): void => {
     setLanguage(language === 'en' ? 'ar' : 'en');
+  };
+
+  const toggleTheme = (): void => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
   };
 
   const scrollToSection = (section: string): void => {
@@ -186,21 +209,40 @@ export default function WhistleblowerLanding(): React.JSX.Element {
     setUploading(true);
 
     try {
-      // Validate files before processing
       const validFiles = files.filter(file => {
-        // Validate file size (max 10MB)
         if (!validateFileSize(file, 10)) {
-          alert(language === 'en'
-            ? `File "${file.name}" exceeds 10MB limit`
-            : `الملف "${file.name}" يتجاوز حد 10 ميجابايت`);
+          toast.error(
+            language === 'en'
+              ? `File "${file.name}" exceeds the 10MB limit`
+              : `الملف "${file.name}" يتجاوز حد 10 ميجابايت`,
+            {
+              position: 'top-center',
+              autoClose: 4000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              theme: theme === 'dark' ? 'dark' : 'light',
+            }
+          );
           return false;
         }
 
-        // Validate file type
         if (!validateFileType(file)) {
-          alert(language === 'en'
-            ? `File type not allowed: "${file.name}"`
-            : `نوع الملف غير مسموح به: "${file.name}"`);
+          toast.error(
+            language === 'en'
+              ? `File type not allowed: "${file.name}"`
+              : `نوع الملف غير مسموح به: "${file.name}"`,
+            {
+              position: 'top-center',
+              autoClose: 4000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              theme: theme === 'dark' ? 'dark' : 'light',
+            }
+          );
           return false;
         }
 
@@ -209,7 +251,6 @@ export default function WhistleblowerLanding(): React.JSX.Element {
 
       const processedFiles = await Promise.all(
         validFiles.map(async (file): Promise<Attachment> => {
-          // Strip metadata using utility function
           const strippedFile = await stripMetadata(file);
 
           return {
@@ -225,9 +266,16 @@ export default function WhistleblowerLanding(): React.JSX.Element {
       setAttachments([...attachments, ...processedFiles]);
     } catch (error) {
       console.error('Error processing files:', error);
-      alert(language === 'en'
-        ? 'Error processing files. Please try again.'
-        : 'خطأ في معالجة الملفات. يرجى المحاولة مرة أخرى.');
+      toast.error(
+        language === 'en'
+          ? 'Error processing files. Please try again.'
+          : 'خطأ في معالجة الملفات. يرجى المحاولة مرة أخرى.',
+        {
+          position: 'top-center',
+          autoClose: 4000,
+          theme: theme === 'dark' ? 'dark' : 'light',
+        }
+      );
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -241,110 +289,166 @@ export default function WhistleblowerLanding(): React.JSX.Element {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    if (!formData.department) {
-      alert(language === 'en' ? 'Please select a department' : 'يرجى اختيار قسم');
+    if (!formData.site) {
+      toast.warning(
+        language === 'en' ? 'Please select a site' : 'يرجى اختيار موقع',
+        {
+          position: 'top-center',
+          autoClose: 3000,
+          theme: theme === 'dark' ? 'dark' : 'light',
+        }
+      );
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const preparedAttachments = await Promise.all(
+      const emailAttachments = await Promise.all(
         attachments.map(async item => ({
-          name: item.name,
-          data: await fileToBase64(item.file),
-          type: item.type
+          filename: item.name,
+          content: await fileToBase64(item.file),
+          contentType: item.type
         }))
       );
 
-      const templateParams = {
-        to_email: "salshaiban@alkhorayef.com",
+      const siteName = sites[language].find(s => s.id === formData.site)?.name || formData.site;
+      const deptName = departments[language].find(d => d.id === formData.department)?.name || formData.department;
+
+      const payload = {
         name: formData.name || (language === 'ar' ? 'مجهول' : 'Anonymous'),
         email: formData.email || (language === 'ar' ? 'غير مقدم' : 'Not provided'),
-        site: formData.site || (language === 'ar' ? 'غير محدد' : 'Not specified'),
-        department: departments[language].find(d => d.id === formData.department)?.name || (language === 'ar' ? 'غير محدد' : 'Unspecified'),
+        site: formData.site,
+        siteName: siteName,
+        department: formData.department,
+        departmentName: deptName,
         message: formData.message,
-        date: new Date().toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US', {
-          timeZone: 'Asia/Riyadh',
-          dateStyle: 'full',
-          timeStyle: 'long'
-        }),
-        attachments: preparedAttachments.map(a => a.data)
+        language: language,
+        attachments: emailAttachments,
+        recipientEmail: departmentEmails[formData.department] || 'salshaiban@alkhorayef.com'
       };
 
-      const templateId = language === 'en' ? 'template_k6wiwom' : 'template_o6avgox';
+      const response = await fetch(`${API_URL}:5000/api/sendReport`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
 
-      await emailjs.send(
-        'service_ck8gxvt',
-        templateId,
-        templateParams,
-        'rgGP3T9q40M3lpbhF'
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.details || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Report sent successfully:', result);
+
+      toast.success(
+        language === 'en'
+          ? 'Report submitted securely! You will receive a confirmation shortly.'
+          : 'تم تقديم البلاغ بأمان! سوف تتلقى تأكيدًا قريبًا.',
+        {
+          position: 'top-center',
+          autoClose: 4000,
+          theme: theme === 'dark' ? 'dark' : 'light',
+        }
       );
-
-      alert(language === 'en'
-        ? 'Report submitted securely!'
-        : 'تم تقديم البلاغ بأمان!');
 
       setFormData({ name: '', email: '', site: '', department: '', message: '' });
       setAttachments([]);
 
     } catch (error) {
       console.error('Error submitting report:', error);
-      alert(language === 'en'
-        ? 'Error submitting report. Please try again.'
-        : 'خطأ في تقديم البلاغ. يرجى المحاولة مرة أخرى.');
+
+      toast.error(
+        language === 'en'
+          ? `Error submitting report: ${error instanceof Error ? error.message : 'Please try again.'}`
+          : `خطأ في تقديم البلاغ: ${error instanceof Error ? error.message : 'يرجى المحاولة مرة أخرى.'}`,
+        {
+          position: 'top-center',
+          autoClose: 5000,
+          theme: theme === 'dark' ? 'dark' : 'light',
+        }
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Theme-specific classes
+  const bgGradient = theme === 'dark' 
+    ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'
+    : 'bg-gradient-to-br from-blue-50 via-white to-purple-50';
+  
+  const navBg = theme === 'dark' 
+    ? 'bg-slate-900/95 border-blue-500/20'
+    : 'bg-white/95 border-blue-200 shadow-sm';
+  
+  const textPrimary = theme === 'dark' ? 'text-white' : 'text-gray-900';
+  const textSecondary = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
+  const textTertiary = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  
+  const cardBg = theme === 'dark' 
+    ? 'bg-slate-800/50 border-blue-500/20'
+    : 'bg-white border-blue-100 shadow-lg';
+  
+  const inputBg = theme === 'dark'
+    ? 'bg-slate-900/50 border-blue-500/30 text-white'
+    : 'bg-white border-gray-300 text-gray-900';
+
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen ${bgGradient} ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <ToastContainer position="top-center" theme={theme === 'dark' ? 'dark' : 'light'} />
+      
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-slate-900/95 backdrop-blur-sm border-b border-blue-500/20 z-50">
+      <nav className={`fixed top-0 w-full ${navBg} backdrop-blur-sm border-b z-50`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div
-              className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''
-                }`}
-            >
+            <div className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
               <img src={logo} alt="Speak Safe Logo" className="logo h-8 w-auto" />
-              <span className="text-xl font-bold text-white">Speak Safe AMIC</span>
+              <span className={`text-xl font-bold ${textPrimary}`}>Speak Safe AMIC</span>
             </div>
 
             {/* Desktop Navigation */}
             <div className={`hidden md:flex items-center space-x-8 ${isRTL ? 'space-x-reverse' : ''}`}>
               <button
                 onClick={() => scrollToSection('home')}
-                className="text-gray-300 hover:text-blue-400 transition-colors"
+                className={`${textSecondary} hover:text-blue-500 transition-colors`}
               >
                 {t.nav.home}
               </button>
               <button
                 onClick={() => scrollToSection('form')}
-                className="text-gray-300 hover:text-blue-400 transition-colors"
+                className={`${textSecondary} hover:text-blue-500 transition-colors`}
               >
                 {t.nav.form}
               </button>
               <button
                 onClick={() => scrollToSection('faq')}
-                className="text-gray-300 hover:text-blue-400 transition-colors"
+                className={`${textSecondary} hover:text-blue-500 transition-colors`}
               >
                 {t.nav.faq}
               </button>
               <button
-                onClick={toggleLanguage}
-                className="flex items-center space-x-2 px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} transition-colors`}
               >
-                <Globe className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-300">{language === 'en' ? 'العربية' : 'English'}</span>
+                {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-blue-600" />}
+              </button>
+              <button
+                onClick={toggleLanguage}
+                className={`flex items-center space-x-2 px-3 py-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors`}
+              >
+                <Globe className={`w-4 h-4 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                <span className={textSecondary}>{language === 'en' ? 'العربية' : 'English'}</span>
               </button>
             </div>
 
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white"
+              className={`md:hidden ${textPrimary}`}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -353,32 +457,39 @@ export default function WhistleblowerLanding(): React.JSX.Element {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-slate-800 border-t border-blue-500/20">
+          <div className={`md:hidden ${theme === 'dark' ? 'bg-slate-800 border-blue-500/20' : 'bg-white border-gray-200'} border-t`}>
             <div className="px-4 py-3 space-y-3">
               <button
                 onClick={() => scrollToSection('home')}
-                className="block w-full text-left text-gray-300 hover:text-blue-400 transition-colors"
+                className={`block w-full text-left ${textSecondary} hover:text-blue-500 transition-colors`}
               >
                 {t.nav.home}
               </button>
               <button
                 onClick={() => scrollToSection('form')}
-                className="block w-full text-left text-gray-300 hover:text-blue-400 transition-colors"
+                className={`block w-full text-left ${textSecondary} hover:text-blue-500 transition-colors`}
               >
                 {t.nav.form}
               </button>
               <button
                 onClick={() => scrollToSection('faq')}
-                className="block w-full text-left text-gray-300 hover:text-blue-400 transition-colors"
+                className={`block w-full text-left ${textSecondary} hover:text-blue-500 transition-colors`}
               >
                 {t.nav.faq}
               </button>
               <button
-                onClick={toggleLanguage}
-                className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors w-full`}
+                onClick={toggleTheme}
+                className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} px-3 py-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors w-full`}
               >
-                <Globe className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-300">{language === 'en' ? 'العربية' : 'English'}</span>
+                {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+                <span className={textSecondary}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+              <button
+                onClick={toggleLanguage}
+                className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} px-3 py-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors w-full`}
+              >
+                <Globe className={`w-4 h-4 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                <span className={textSecondary}>{language === 'en' ? 'العربية' : 'English'}</span>
               </button>
             </div>
           </div>
@@ -388,13 +499,13 @@ export default function WhistleblowerLanding(): React.JSX.Element {
       {/* Hero Section */}
       <section id="home" className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-block mb-6 px-4 py-2 bg-blue-500/20 rounded-full border border-blue-400/30">
-            <span className="text-blue-300 text-sm font-medium">{t.hero.badge}</span>
+          <div className={`inline-block mb-6 px-4 py-2 ${theme === 'dark' ? 'bg-blue-500/20 border-blue-400/30' : 'bg-blue-100 border-blue-300'} rounded-full border`}>
+            <span className={`${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'} text-sm font-medium`}>{t.hero.badge}</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+          <h1 className={`text-5xl md:text-7xl font-bold ${textPrimary} mb-6 leading-tight`}>
             {t.hero.title1}<br />{t.hero.title2}
           </h1>
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+          <p className={`text-xl ${textSecondary} mb-12 max-w-3xl mx-auto`}>
             {t.hero.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -406,7 +517,7 @@ export default function WhistleblowerLanding(): React.JSX.Element {
             </button>
             <button
               onClick={() => scrollToSection('faq')}
-              className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-semibold transition-all border border-blue-500/30"
+              className={`px-8 py-4 ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 border-blue-500/30' : 'bg-white hover:bg-gray-50 border-gray-300'} ${textPrimary} rounded-lg font-semibold transition-all border`}
             >
               {t.hero.learnBtn}
             </button>
@@ -414,63 +525,67 @@ export default function WhistleblowerLanding(): React.JSX.Element {
 
           {/* Features */}
           <div className="grid md:grid-cols-3 gap-8 mt-20">
-            <div className="bg-slate-800/50 backdrop-blur p-8 rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <Shield className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-3">{t.features.anonymity.title}</h3>
-              <p className="text-gray-400">{t.features.anonymity.desc}</p>
+            <div className={`${cardBg} backdrop-blur p-8 rounded-xl border hover:border-blue-500/40 transition-all`}>
+              <ZoomIn className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`} />
+              <h3 className={`text-xl font-bold ${textPrimary} mb-3`}>{t.features.help.title}</h3>
+              <p className={textTertiary}>{t.features.help.desc}</p>
             </div>
-            <div className="bg-slate-800/50 backdrop-blur p-8 rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <FileText className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-3">{t.features.legal.title}</h3>
-              <p className="text-gray-400">{t.features.legal.desc}</p>
+            <div className={`${cardBg} backdrop-blur p-8 rounded-xl border hover:border-blue-500/40 transition-all`}>
+              <Shield className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`} />
+              <h3 className={`text-xl font-bold ${textPrimary} mb-3`}>{t.features.anonymity.title}</h3>
+              <p className={textTertiary}>{t.features.anonymity.desc}</p>
+            </div>
+            <div className={`${cardBg} backdrop-blur p-8 rounded-xl border hover:border-blue-500/40 transition-all`}>
+              <FileText className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`} />
+              <h3 className={`text-xl font-bold ${textPrimary} mb-3`}>{t.features.legal.title}</h3>
+              <p className={textTertiary}>{t.features.legal.desc}</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Form Section */}
-      <section id="form" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
+      <section id="form" className={`py-20 px-4 sm:px-6 lg:px-8 ${theme === 'dark' ? 'bg-slate-800/30' : 'bg-gray-50/50'}`}>
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">{t.form.title}</h2>
-            <p className="text-gray-300">{t.form.subtitle}</p>
+            <h2 className={`text-4xl font-bold ${textPrimary} mb-4`}>{t.form.title}</h2>
+            <p className={textSecondary}>{t.form.subtitle}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-slate-800/50 backdrop-blur p-8 rounded-xl border border-blue-500/20">
+          <form onSubmit={handleSubmit} className={`${cardBg} backdrop-blur p-8 rounded-xl border`}>
             <div className="mb-6">
-              <label className="block text-gray-300 mb-2 font-medium">{t.form.name}</label>
+              <label className={`block ${textSecondary} mb-2 font-medium`}>{t.form.name}</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder={t.form.namePlaceholder}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors`}
               />
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-300 mb-2 font-medium">{t.form.email}</label>
+              <label className={`block ${textSecondary} mb-2 font-medium`}>{t.form.email}</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder={t.form.emailPlaceholder}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors`}
               />
             </div>
 
-            {/* Department Dropdown */}
             <div className="mb-6">
-              <label className="block text-gray-300 mb-2 font-medium">
+              <label className={`block ${textSecondary} mb-2 font-medium`}>
                 {language === 'en' ? 'Department (Optional)' : 'القسم (اختياري)'}
               </label>
               <select
                 name="department"
                 value={formData.department}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className={`w-full px-4 py-3 ${inputBg} border rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
               >
                 <option value="">
                   {language === 'en' ? '-- Select Department --' : '-- اختر القسم --'}
@@ -483,9 +598,8 @@ export default function WhistleblowerLanding(): React.JSX.Element {
               </select>
             </div>
 
-            {/* Site Dropdown */}
             <div className="mb-6">
-              <label className="block text-gray-300 mb-2 font-medium">
+              <label className={`block ${textSecondary} mb-2 font-medium`}>
                 {language === 'en' ? 'Location *' : 'الموقع *'}
               </label>
               <select
@@ -493,7 +607,7 @@ export default function WhistleblowerLanding(): React.JSX.Element {
                 name="site"
                 value={formData.site}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className={`w-full px-4 py-3 ${inputBg} border rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
               >
                 <option value="">
                   {language === 'en' ? '-- Select Location --' : '-- اختر الموقع --'}
@@ -507,7 +621,7 @@ export default function WhistleblowerLanding(): React.JSX.Element {
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-300 mb-2 font-medium">{t.form.message}</label>
+              <label className={`block ${textSecondary} mb-2 font-medium`}>{t.form.message}</label>
               <textarea
                 name="message"
                 value={formData.message}
@@ -515,16 +629,16 @@ export default function WhistleblowerLanding(): React.JSX.Element {
                 required
                 rows={8}
                 placeholder={t.form.messagePlaceholder}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-blue-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none`}
               />
             </div>
 
             {/* File Upload Section */}
             <div className="mb-6">
-              <label className="block text-gray-300 mb-2 font-medium">
+              <label className={`block ${textSecondary} mb-2 font-medium`}>
                 {language === 'en' ? 'Attachments (Optional)' : 'المرفقات (اختياري)'}
               </label>
-              <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors">
+              <div className={`border-2 border-dashed ${theme === 'dark' ? 'border-blue-500/30 hover:border-blue-500/50' : 'border-gray-300 hover:border-blue-400'} rounded-lg p-6 text-center transition-colors`}>
                 <input
                   type="file"
                   id="file-upload"
@@ -537,13 +651,13 @@ export default function WhistleblowerLanding(): React.JSX.Element {
                   htmlFor="file-upload"
                   className="cursor-pointer flex flex-col items-center"
                 >
-                  <Upload className="w-12 h-12 text-blue-400 mb-3" />
-                  <span className="text-gray-300 mb-2">
+                  <Upload className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mb-3`} />
+                  <span className={`${textSecondary} mb-2`}>
                     {language === 'en'
                       ? 'Click to upload or drag and drop'
                       : 'انقر للتحميل أو اسحب وأفلت'}
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className={`text-sm ${textTertiary}`}>
                     {language === 'en'
                       ? 'Images, PDFs, Documents (Max 10MB each)'
                       : 'الصور، ملفات PDF، المستندات (حد أقصى 10 ميجابايت لكل ملف)'}
@@ -552,10 +666,10 @@ export default function WhistleblowerLanding(): React.JSX.Element {
               </div>
 
               {/* Metadata Stripping Notice */}
-              <div className="mt-3 bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+              <div className={`mt-3 ${theme === 'dark' ? 'bg-green-500/10 border-green-500/30' : 'bg-green-50 border-green-200'} border rounded-lg p-3`}>
                 <div className={`flex items-start space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  <Shield className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-gray-300">
+                  <Shield className={`w-4 h-4 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'} mt-0.5 flex-shrink-0`} />
+                  <p className={`text-xs ${textSecondary}`}>
                     {language === 'en'
                       ? 'All metadata (location, device info, etc.) is automatically removed from uploaded files to protect your privacy.'
                       : 'تتم إزالة جميع البيانات الوصفية (الموقع، معلومات الجهاز، إلخ) تلقائيًا من الملفات المحملة لحماية خصوصيتك.'}
@@ -569,13 +683,13 @@ export default function WhistleblowerLanding(): React.JSX.Element {
                   {attachments.map((file) => (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between bg-slate-900/50 border border-blue-500/30 rounded-lg p-3"
+                      className={`flex items-center justify-between ${theme === 'dark' ? 'bg-slate-900/50 border-blue-500/30' : 'bg-gray-50 border-gray-300'} border rounded-lg p-3`}
                     >
                       <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} flex-1`}>
-                        <File className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                        <File className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0`} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white truncate">{file.name}</p>
-                          <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                          <p className={`text-sm ${textPrimary} truncate`}>{file.name}</p>
+                          <p className={`text-xs ${textTertiary}`}>{formatFileSize(file.size)}</p>
                         </div>
                       </div>
                       <button
@@ -591,16 +705,16 @@ export default function WhistleblowerLanding(): React.JSX.Element {
               )}
 
               {uploading && (
-                <div className="mt-3 text-center text-blue-400 text-sm">
+                <div className={`mt-3 text-center ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} text-sm`}>
                   {language === 'en' ? 'Processing files...' : 'معالجة الملفات...'}
                 </div>
               )}
             </div>
 
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+            <div className={`${theme === 'dark' ? 'bg-blue-500/10 border-blue-500/30' : 'bg-blue-50 border-blue-200'} border rounded-lg p-4 mb-6`}>
               <div className={`flex items-start space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <Lock className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-gray-300">
+                <Lock className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mt-0.5 flex-shrink-0`} />
+                <p className={`text-sm ${textSecondary}`}>
                   {t.form.securityNote}
                 </p>
               </div>
@@ -624,39 +738,38 @@ export default function WhistleblowerLanding(): React.JSX.Element {
       <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">{t.faq.title}</h2>
-            <p className="text-gray-300">{t.faq.subtitle}</p>
+            <h2 className={`text-4xl font-bold ${textPrimary} mb-4`}>{t.faq.title}</h2>
+            <p className={textSecondary}>{t.faq.subtitle}</p>
           </div>
 
           <div className="space-y-4">
             {t.faq.questions.map((faq, index) => (
               <div
                 key={index}
-                className="bg-slate-800/50 backdrop-blur rounded-xl border border-blue-500/20 overflow-hidden"
+                className={`${cardBg} backdrop-blur rounded-xl border overflow-hidden`}
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-slate-800/70 transition-colors"
+                  className={`w-full px-6 py-5 flex items-center justify-between text-left ${theme === 'dark' ? 'hover:bg-slate-800/70' : 'hover:bg-gray-50'} transition-colors`}
                 >
-                  <span className={`text-lg font-semibold text-white ${isRTL ? 'pl-4' : 'pr-4'}`}>{faq.q}</span>
+                  <span className={`text-lg font-semibold ${textPrimary} ${isRTL ? 'pl-4' : 'pr-4'}`}>{faq.q}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-blue-400 flex-shrink-0 transition-transform ${openFaq === index ? 'transform rotate-180' : ''
-                      }`}
+                    className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0 transition-transform ${openFaq === index ? 'transform rotate-180' : ''}`}
                   />
                 </button>
                 {openFaq === index && (
                   <div className="px-6 pb-5">
-                    <p className="text-gray-300 leading-relaxed">{faq.a}</p>
+                    <p className={`${textSecondary} leading-relaxed`}>{faq.a}</p>
                   </div>
                 )}
               </div>
             ))}
           </div>
 
-          <div className="mt-12 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-8 border border-blue-500/30 text-center">
-            <MessageSquare className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-3">{t.faq.stillQuestions}</h3>
-            <p className="text-gray-300 mb-6">{t.faq.supportText}</p>
+          <div className={`mt-12 ${theme === 'dark' ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30' : 'bg-gradient-to-r from-blue-100 to-purple-100 border-blue-200'} rounded-xl p-8 border text-center`}>
+            <MessageSquare className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`} />
+            <h3 className={`text-2xl font-bold ${textPrimary} mb-3`}>{t.faq.stillQuestions}</h3>
+            <p className={`${textSecondary} mb-6`}>{t.faq.supportText}</p>
             <button className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all">
               {t.faq.contactBtn}
             </button>
@@ -665,13 +778,13 @@ export default function WhistleblowerLanding(): React.JSX.Element {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900/50 border-t border-blue-500/20 py-8 px-4">
+      <footer className={`${theme === 'dark' ? 'bg-slate-900/50 border-blue-500/20' : 'bg-gray-50 border-gray-200'} border-t py-8 px-4`}>
         <div className="max-w-7xl mx-auto text-center">
           <div className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} mb-4`}>
-            <Shield className="w-6 h-6 text-blue-400" />
-            <span className="text-lg font-bold text-white">SecureReport</span>
+            <Shield className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+            <span className={`text-lg font-bold ${textPrimary}`}>SecureReport</span>
           </div>
-          <p className="text-gray-400 text-sm">
+          <p className={`${textTertiary} text-sm`}>
             {t.footer}
           </p>
         </div>
