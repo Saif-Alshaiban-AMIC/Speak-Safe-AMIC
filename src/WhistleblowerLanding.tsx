@@ -16,7 +16,8 @@ import { departmentEmails, sites, departments } from './constants/data';
 import type { Language, Theme, Translations, FormData, Attachment } from './types';
 import './App.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const translations: Record<Language, Translations> = { en, ar };
 
 export default function WhistleblowerLanding(): React.JSX.Element {
