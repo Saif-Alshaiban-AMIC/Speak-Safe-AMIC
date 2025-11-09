@@ -781,8 +781,8 @@ export default function WhistleblowerLanding(): React.JSX.Element {
       <footer className={`${theme === 'dark' ? 'bg-slate-900/50 border-blue-500/20' : 'bg-gray-50 border-gray-200'} border-t py-8 px-4`}>
         <div className="max-w-7xl mx-auto text-center">
           <div className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} mb-4`}>
-            <Shield className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
-            <span className={`text-lg font-bold ${textPrimary}`}>SecureReport</span>
+               <img src={logo} alt="Speak Safe Logo" className="logo h-8 w-auto" />
+            <span className={`text-lg font-bold ${textPrimary}`}>Speak Safe AMIC</span>
           </div>
           <p className={`${textTertiary} text-sm`}>
             {t.footer}
