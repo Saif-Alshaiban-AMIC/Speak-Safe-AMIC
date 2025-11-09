@@ -13,7 +13,6 @@ interface FAQSectionProps {
 }
 
 export const FAQSection: React.FC<FAQSectionProps> = ({
-  language,
   theme,
   openFaq,
   setOpenFaq,

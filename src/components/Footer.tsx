@@ -11,7 +11,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({
-  language,
+ 
   theme,
   t,
   isRTL,

@@ -11,7 +11,7 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
-  language,
+
   theme,
   scrollToSection,
   t,

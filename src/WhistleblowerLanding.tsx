@@ -22,7 +22,6 @@ const translations: Record<Language, Translations> = { en, ar };
 export default function WhistleblowerLanding(): React.JSX.Element {
   const [language, setLanguage] = useState<Language>('en');
   const [theme, setTheme] = useState<Theme>('dark');
-  const [activeSection, setActiveSection] = useState<string>('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -57,7 +56,7 @@ export default function WhistleblowerLanding(): React.JSX.Element {
   };
 
   const scrollToSection = (section: string): void => {
-    setActiveSection(section);
+    // setActiveSection(section);
     setMobileMenuOpen(false);
     const element = document.getElementById(section);
     if (element) {
