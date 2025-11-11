@@ -193,7 +193,7 @@ export default function WhistleblowerLanding(): React.JSX.Element {
         message: formData.message,
         language: language,
         attachments: emailAttachments,
-        recipientEmail: departmentEmails[formData.department] || 'salshaiban@alkhorayef.com'
+
       };
 
       const response = await fetch(`${API_URL}:5000/api/sendReport`, {
@@ -244,14 +244,14 @@ export default function WhistleblowerLanding(): React.JSX.Element {
     }
   };
 
-  const bgGradient = theme === 'dark' 
+  const bgGradient = theme === 'dark'
     ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'
     : 'bg-gradient-to-br from-blue-50 via-white to-purple-50';
 
   return (
     <div className={`min-h-screen ${bgGradient} ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <ToastContainer position="top-center" theme={theme === 'dark' ? 'dark' : 'light'} />
-      
+
       <Navigation
         language={language}
         theme={theme}
