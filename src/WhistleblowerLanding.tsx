@@ -12,7 +12,7 @@ import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
 import { stripMetadata, validateFileSize, validateFileType } from './utils/metadataUtils';
 import { fileToBase64 } from './utils/base64';
-import { departmentEmails, sites, departments } from './constants/data';
+import { sites, departments } from './constants/data';
 import type { Language, Theme, Translations, FormData, Attachment } from './types';
 import './App.css';
 

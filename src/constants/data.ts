@@ -1,14 +1,6 @@
 // constants/data.ts
-import type { Language, Site, Department, DepartmentEmails } from '../types';
+import type { Language, Site, Department } from '../types';
 
-export const departmentEmails: DepartmentEmails = {
-  hr: 'salshaiban@alkhorayef.com',
-  finance: 'salshaiban@alkhorayef.com',
-  it: 'salshaiban@alkhorayef.com',
-  compliance: 'salshaiban@alkhorayef.com',
-  other: 'salshaiban@alkhorayef.com',
-  project: 'salshaiban@alkhorayef.com'
-};
 
 export const sites: Record<Language, Site[]> = {
   en: [
