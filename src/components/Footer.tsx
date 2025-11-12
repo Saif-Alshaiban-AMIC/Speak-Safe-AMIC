@@ -1,6 +1,6 @@
 // components/Footer.tsx
 import React from 'react';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo-bg.png';
 import type { Language, Theme, Translations } from '../types';
 
 interface FooterProps {

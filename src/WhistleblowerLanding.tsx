@@ -51,7 +51,7 @@ export default function WhistleblowerLanding(): React.JSX.Element {
   };
 
   const toggleTheme = (): void => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    const newTheme = theme === 'dark' ? 'light' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
   };
