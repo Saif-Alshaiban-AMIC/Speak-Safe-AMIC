@@ -42,7 +42,7 @@ export default function WhistleblowerLanding(): React.JSX.Element {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme;
     if (savedTheme) {
-      setTheme(savedTheme);
+      setTheme("light");
     }
   }, []);
 

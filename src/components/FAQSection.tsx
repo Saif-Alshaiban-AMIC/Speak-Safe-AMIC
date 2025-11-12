@@ -58,7 +58,7 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
           ))}
         </div>
 
-        <div className={`mt-12 ${theme === 'dark' ? 'bg-gradient-to-r from-brand-500/20 to-purple-500/20 border-brand-500/30' : 'bg-gradient-to-r from-brand-100 to-purple-100 border-brand-200'} rounded-xl p-8 border text-center`}>
+        <div className={`mt-12 ${theme === 'dark' ? 'bg-gradient-to-r from-brand-700/20 to-purple-500/20 border-brand-500/30' : 'bg-gradient-to-r from-brand-100 to-purple-100 border-brand-200'} rounded-xl p-8 border text-center`}>
           <MessageSquare className={`w-12 h-12 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'} mx-auto mb-4`} />
           <h3 className={`text-2xl font-bold ${textPrimary} mb-3`}>{t.faq.stillQuestions}</h3>
           <p className={`${textSecondary} mb-6`}>{t.faq.supportText}</p>
