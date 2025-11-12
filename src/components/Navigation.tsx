@@ -1,7 +1,7 @@
 // components/Navigation.tsx
 import React from 'react';
 import { Menu, X, Globe, Moon, Sun } from 'lucide-react';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo-bg.png';
 import type { Language, Theme, Translations } from '../types';
 
 interface NavigationProps {
@@ -28,8 +28,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   isRTL,
 }) => {
   const navBg = theme === 'dark' 
-    ? 'bg-slate-900/95 border-blue-500/20'
-    : 'bg-white/95 border-blue-200 shadow-sm';
+    ? 'bg-slate-900/95 border-brand-500/20'
+    : 'bg-white/95 border-brand-200 shadow-sm';
   
   const textPrimary = theme === 'dark' ? 'text-white' : 'text-gray-900';
   const textSecondary = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
@@ -47,33 +47,28 @@ export const Navigation: React.FC<NavigationProps> = ({
           <div className={`hidden md:flex items-center space-x-8 ${isRTL ? 'space-x-reverse' : ''}`}>
             <button
               onClick={() => scrollToSection('home')}
-              className={`${textSecondary} hover:text-blue-500 transition-colors`}
+              className={`${textSecondary} hover:text-brand-500 transition-colors`}
             >
               {t.nav.home}
             </button>
             <button
               onClick={() => scrollToSection('form')}
-              className={`${textSecondary} hover:text-blue-500 transition-colors`}
+              className={`${textSecondary} hover:text-brand-500 transition-colors`}
             >
               {t.nav.form}
             </button>
             <button
               onClick={() => scrollToSection('faq')}
-              className={`${textSecondary} hover:text-blue-500 transition-colors`}
+              className={`${textSecondary} hover:text-brand-500 transition-colors`}
             >
               {t.nav.faq}
             </button>
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} transition-colors`}
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-blue-600" />}
-            </button>
+           
             <button
               onClick={toggleLanguage}
-              className={`flex items-center space-x-2 px-3 py-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors`}
+              className={`flex items-center space-x-2 px-3 py-2 ${theme === 'dark' ? 'bg-brand-500/20 hover:bg-brand-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors`}
             >
-              <Globe className={`w-4 h-4 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+              <Globe className={`w-4 h-4 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'}`} />
               <span className={textSecondary}>{language === 'en' ? 'العربية' : 'English'}</span>
             </button>
           </div>
@@ -90,38 +85,38 @@ export const Navigation: React.FC<NavigationProps> = ({
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className={`md:hidden ${theme === 'dark' ? 'bg-slate-800 border-blue-500/20' : 'bg-white border-gray-200'} border-t`}>
+        <div className={`md:hidden ${theme === 'dark' ? 'bg-slate-800 border-brand-500/20' : 'bg-white border-gray-200'} border-t`}>
           <div className="px-4 py-3 space-y-3">
             <button
               onClick={() => scrollToSection('home')}
-              className={`block w-full text-left ${textSecondary} hover:text-blue-500 transition-colors`}
+              className={`block w-full text-left ${textSecondary} hover:text-brand-500 transition-colors`}
             >
               {t.nav.home}
             </button>
             <button
               onClick={() => scrollToSection('form')}
-              className={`block w-full text-left ${textSecondary} hover:text-blue-500 transition-colors`}
+              className={`block w-full text-left ${textSecondary} hover:text-brand-500 transition-colors`}
             >
               {t.nav.form}
             </button>
             <button
               onClick={() => scrollToSection('faq')}
-              className={`block w-full text-left ${textSecondary} hover:text-blue-500 transition-colors`}
+              className={`block w-full text-left ${textSecondary} hover:text-brand-500 transition-colors`}
             >
               {t.nav.faq}
             </button>
             <button
               onClick={toggleTheme}
-              className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} px-3 py-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors w-full`}
+              className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} px-3 py-2 ${theme === 'dark' ? 'bg-brand-500/20 hover:bg-brand-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors w-full`}
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-brand-600" />}
               <span className={textSecondary}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
             </button>
             <button
               onClick={toggleLanguage}
-              className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} px-3 py-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors w-full`}
+              className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} px-3 py-2 ${theme === 'dark' ? 'bg-brand-500/20 hover:bg-brand-500/30' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg transition-colors w-full`}
             >
-              <Globe className={`w-4 h-4 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+              <Globe className={`w-4 h-4 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'}`} />
               <span className={textSecondary}>{language === 'en' ? 'العربية' : 'English'}</span>
             </button>
           </div>

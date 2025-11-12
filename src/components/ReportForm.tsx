@@ -43,11 +43,11 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   const textTertiary = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
   
   const cardBg = theme === 'dark' 
-    ? 'bg-slate-800/50 border-blue-500/20'
-    : 'bg-white border-blue-100 shadow-lg';
+    ? 'bg-slate-800/50 border-brand-500/20'
+    : 'bg-white border-brand-100 shadow-lg';
   
   const inputBg = theme === 'dark'
-    ? 'bg-slate-900/50 border-blue-500/30 text-white'
+    ? 'bg-slate-900/50 border-brand-500/30 text-white'
     : 'bg-white border-gray-300 text-gray-900';
 
   return (
@@ -67,7 +67,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               value={formData.name}
               onChange={handleInputChange}
               placeholder={t.form.namePlaceholder}
-              className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-brand-500 transition-colors`}
             />
           </div>
 
@@ -79,7 +79,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               value={formData.email}
               onChange={handleInputChange}
               placeholder={t.form.emailPlaceholder}
-              className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-brand-500 transition-colors`}
             />
           </div>
 
@@ -91,7 +91,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               name="department"
               value={formData.department}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 ${inputBg} border rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full px-4 py-3 ${inputBg} border rounded-lg focus:outline-none focus:border-brand-500 transition-colors`}
             >
               <option value="">
                 {language === 'en' ? '-- Select Department --' : '-- اختر القسم --'}
@@ -113,7 +113,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               name="site"
               value={formData.site}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 ${inputBg} border rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full px-4 py-3 ${inputBg} border rounded-lg focus:outline-none focus:border-brand-500 transition-colors`}
             >
               <option value="">
                 {language === 'en' ? '-- Select Location --' : '-- اختر الموقع --'}
@@ -135,7 +135,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               required
               rows={8}
               placeholder={t.form.messagePlaceholder}
-              className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none`}
+              className={`w-full px-4 py-3 ${inputBg} border rounded-lg placeholder-gray-500 focus:outline-none focus:border-brand-500 transition-colors resize-none`}
             />
           </div>
 
@@ -144,7 +144,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
             <label className={`block ${textSecondary} mb-2 font-medium`}>
               {language === 'en' ? 'Attachments (Optional)' : 'المرفقات (اختياري)'}
             </label>
-            <div className={`border-2 border-dashed ${theme === 'dark' ? 'border-blue-500/30 hover:border-blue-500/50' : 'border-gray-300 hover:border-blue-400'} rounded-lg p-6 text-center transition-colors`}>
+            <div className={`border-2 border-dashed ${theme === 'dark' ? 'border-brand-500/30 hover:border-brand-500/50' : 'border-gray-300 hover:border-brand-400'} rounded-lg p-6 text-center transition-colors`}>
               <input
                 type="file"
                 id="file-upload"
@@ -157,7 +157,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
                 htmlFor="file-upload"
                 className="cursor-pointer flex flex-col items-center"
               >
-                <Upload className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mb-3`} />
+                <Upload className={`w-12 h-12 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'} mb-3`} />
                 <span className={`${textSecondary} mb-2`}>
                   {language === 'en'
                     ? 'Click to upload or drag and drop'
@@ -189,10 +189,10 @@ export const ReportForm: React.FC<ReportFormProps> = ({
                 {attachments.map((file) => (
                   <div
                     key={file.id}
-                    className={`flex items-center justify-between ${theme === 'dark' ? 'bg-slate-900/50 border-blue-500/30' : 'bg-gray-50 border-gray-300'} border rounded-lg p-3`}
+                    className={`flex items-center justify-between ${theme === 'dark' ? 'bg-slate-900/50 border-brand-500/30' : 'bg-gray-50 border-gray-300'} border rounded-lg p-3`}
                   >
                     <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} flex-1`}>
-                      <File className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0`} />
+                      <File className={`w-5 h-5 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'} flex-shrink-0`} />
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm ${textPrimary} truncate`}>{file.name}</p>
                         <p className={`text-xs ${textTertiary}`}>{formatFileSize(file.size)}</p>
@@ -211,15 +211,15 @@ export const ReportForm: React.FC<ReportFormProps> = ({
             )}
 
             {uploading && (
-              <div className={`mt-3 text-center ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} text-sm`}>
+              <div className={`mt-3 text-center ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'} text-sm`}>
                 {language === 'en' ? 'Processing files...' : 'معالجة الملفات...'}
               </div>
             )}
           </div>
 
-          <div className={`${theme === 'dark' ? 'bg-blue-500/10 border-blue-500/30' : 'bg-blue-50 border-blue-200'} border rounded-lg p-4 mb-6`}>
+          <div className={`${theme === 'dark' ? 'bg-brand-500/10 border-brand-500/30' : 'bg-brand-50 border-brand-200'} border rounded-lg p-4 mb-6`}>
             <div className={`flex items-start space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-              <Lock className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mt-0.5 flex-shrink-0`} />
+              <Lock className={`w-5 h-5 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'} mt-0.5 flex-shrink-0`} />
               <p className={`text-sm ${textSecondary}`}>
                 {t.form.securityNote}
               </p>
@@ -229,7 +229,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
           <button
             type="submit"
             disabled={uploading || submitting}
-            className="w-full px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="w-full px-8 py-4 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg shadow-brand-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {submitting
               ? (language === 'en' ? 'Submitting...' : 'جارٍ الإرسال...')

@@ -23,8 +23,8 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
   const textSecondary = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
   
   const cardBg = theme === 'dark' 
-    ? 'bg-slate-800/50 border-blue-500/20'
-    : 'bg-white border-blue-100 shadow-lg';
+    ? 'bg-slate-800/50 border-brand-500/20'
+    : 'bg-white border-brand-100 shadow-lg';
 
   return (
     <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8">
@@ -46,7 +46,7 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
               >
                 <span className={`text-lg font-semibold ${textPrimary} ${isRTL ? 'pl-4' : 'pr-4'}`}>{faq.q}</span>
                 <ChevronDown
-                  className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0 transition-transform ${openFaq === index ? 'transform rotate-180' : ''}`}
+                  className={`w-5 h-5 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'} flex-shrink-0 transition-transform ${openFaq === index ? 'transform rotate-180' : ''}`}
                 />
               </button>
               {openFaq === index && (
@@ -58,11 +58,11 @@ export const FAQSection: React.FC<FAQSectionProps> = ({
           ))}
         </div>
 
-        <div className={`mt-12 ${theme === 'dark' ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30' : 'bg-gradient-to-r from-blue-100 to-purple-100 border-blue-200'} rounded-xl p-8 border text-center`}>
-          <MessageSquare className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mx-auto mb-4`} />
+        <div className={`mt-12 ${theme === 'dark' ? 'bg-gradient-to-r from-brand-500/20 to-purple-500/20 border-brand-500/30' : 'bg-gradient-to-r from-brand-100 to-purple-100 border-brand-200'} rounded-xl p-8 border text-center`}>
+          <MessageSquare className={`w-12 h-12 ${theme === 'dark' ? 'text-brand-400' : 'text-brand-600'} mx-auto mb-4`} />
           <h3 className={`text-2xl font-bold ${textPrimary} mb-3`}>{t.faq.stillQuestions}</h3>
           <p className={`${textSecondary} mb-6`}>{t.faq.supportText}</p>
-          <button className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all">
+          <button className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-semibold transition-all">
             {t.faq.contactBtn}
           </button>
         </div>

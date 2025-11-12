@@ -22,7 +22,7 @@ const translations: Record<Language, Translations> = { en, ar };
 
 export default function WhistleblowerLanding(): React.JSX.Element {
   const [language, setLanguage] = useState<Language>('en');
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>('light');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -245,8 +245,8 @@ export default function WhistleblowerLanding(): React.JSX.Element {
   };
 
   const bgGradient = theme === 'dark'
-    ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'
-    : 'bg-gradient-to-br from-blue-50 via-white to-purple-50';
+    ? 'bg-gradient-to-br from-slate-900 via-brand-900 to-slate-900'
+    : 'bg-gradient-to-br from-brand-50 via-white to-purple-50';
 
   return (
     <div className={`min-h-screen ${bgGradient} ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
